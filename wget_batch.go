@@ -25,20 +25,22 @@ func isFlagPassed(name string) bool {
 
 func main() {
 	
-    var workfile=flag.String("i", "", "批量下载文件，规则：每行一个url")
-	var extension=flag.String("ext", "" ,"下载后缀名")
-	var start_num=flag.Int("index",0,"开始序号")
-	var prefix=flag.String("prefix","file","文件默认前缀")
-    var wget_header=flag.String("header","","set wget header")
-    var threads_num=flag.Int("threads",5,"运行wget的线程数")
+    var workfile=flag.String("i", "", "【必须指定】下载列表文件，规则：每行一个url")
+	var extension=flag.String("ext", "" ,"指定下载文件后缀名")
+	var start_num=flag.Int("index",0,"下载文件开始序号(默认0)")
+    var prefix=flag.String("prefix","file","文件默认前缀")
+    var wget_header=flag.String("header","","set http header (wget --header)")
+    var threads_num=flag.Int("threads",8,"运行wget的线程数")
+    var override=flag.Bool("override",false,"已存在文件是否覆盖（默认不覆盖）")
     flag.Parse()
 
+    
 	if (!(isFlagPassed("i")&&isFlagPassed("ext"))) {
 		println("请输入-h查询用法")
 		os.Exit(0)
 
 	}
-	
+
 	file, err := os.Open(*workfile)
     if err != nil {
 		log.Fatal("不存在文件："+*workfile)
@@ -63,7 +65,7 @@ func main() {
     var mutex sync.Mutex
     var wait sync.WaitGroup
     for i:=0;i<*threads_num;i++{
-        go  exec_wget_cmd_mul(wget_header,tasks,&url_index, prefix, start_num, extension,false,&mutex,&wait,i)
+        go  exec_wget_cmd_mul(wget_header,tasks,&url_index, prefix, start_num, extension,*override,&mutex,&wait,i)
         wait.Add(1)
     }
 	wait.Wait()
@@ -117,10 +119,8 @@ func exec_wget_cmd_mul(wget_header *string, urls []string, url_index *int, prefi
     
         err := cmd.Run()
         if err != nil {
-    
              fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-            
-            
+        
         }
     }
 }
