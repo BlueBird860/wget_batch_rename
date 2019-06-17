@@ -3,7 +3,6 @@ package main
 import (
     "flag"
     "fmt"
-	"strconv"
 	"os"
 	"os/exec"
 	"io"
@@ -75,7 +74,7 @@ func main() {
 
 func getNextFileName(pre *string,index *int, ext *string) string {
 	var filename string
-	filename=*pre + strconv.Itoa (*index) + "." + *ext
+    filename=fmt.Sprintf("%s%03d.%s",*pre,*index,*ext)
 	*index=*index + 1
 	return filename
 }
@@ -108,9 +107,9 @@ func exec_wget_cmd_mul(wget_header *string, urls []string, url_index *int, prefi
             }
         }
         
-        cmd_line:=fmt.Sprintf("\twget --header='%s' %s --output-document='%s'",*wget_header,url,dfile)
+        cmd_line:=fmt.Sprintf("\twget --header='%s' %s --output-document='%s'  --prefer-family=IPv4",*wget_header,url,dfile)
         println(cmd_line)
-        cmd := exec.Command("wget",url,"--header",*wget_header, "--output-document", dfile)
+        cmd := exec.Command("wget",url,"--header",*wget_header, "--output-document", dfile,"--prefer-family","IPv4")
     
         var out bytes.Buffer
         var stderr bytes.Buffer
@@ -119,8 +118,12 @@ func exec_wget_cmd_mul(wget_header *string, urls []string, url_index *int, prefi
     
         err := cmd.Run()
         if err != nil {
+    
              fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-        
+            
+            
         }
     }
 }
+
+
